@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Emojis</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
+    <script>
+      var config = {
+        type: Phaser.AUTO,
+        scale: {
+          mode: Phaser.Scale.RESIZE,
+        },
+        physics: {
+          default: "matter",
+        },
+        scene: {
+          create: create,
+          update: update,
+        },
+      };
+
+      const game = new Phaser.Game(config);
+
+      function create() {
+        this.matter.world.setBounds();
+
+        const screenCenterX =
+          this.cameras.main.worldView.x + this.cameras.main.width / 2;
+        const screenCenterY =
+          this.cameras.main.worldView.y + this.cameras.main.height / 2;
+
+        this.instructions = this.add
+          .text(screenCenterX, screenCenterY, "Click to add emojis", {
+            font: "32px system-ui",
+          })
+          .setOrigin(0.5);
+
+        this.scale.on("resize", () => {
+          this.matter.world.setBounds();
+        });
+      }
+
+      function update() {
+        const pointer = this.input.activePointer;
+
+        if (pointer.isDown) {
+          this.instructions.setVisible(false);
+
+          const text = this.add.text(
+            pointer.worldX,
+            pointer.worldY,
+            String.fromCodePoint(Phaser.Math.Between(0x1f600, 0x1f63f)),
+            {
+              fontSize: 32,
+            }
+          );
+          text.setPadding(4);
+          const body = this.matter.add.circle(
+            pointer.worldX,
+            pointer.worldY,
+            16,
+            { restitution: 1, friction: 0.25 }
+          );
+          this.matter.add.gameObject(text, body);
+          this.matter.setVelocity(
+            body,
+            Phaser.Math.Between(-10, 10),
+            Phaser.Math.Between(-10, 10)
+          );
+        }
+      }
+    </script>
+  </body>
+</html>
